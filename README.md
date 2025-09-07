@@ -8,7 +8,7 @@ A minimal Electron application with TypeScript
 
 ## Project Setup
 
-### Install
+### Install (en la raiz y en la carpeta frontend)
 
 ```bash
 $ npm install
