@@ -1,13 +1,15 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { dyContainer } from './dy.container';
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { AppDependencies } from './app.dependencies';
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     fullscreen: true,
-    show: false,    
+    show: false,
     // autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -58,6 +60,23 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  const appDependencies = new AppDependencies();
+  appDependencies.loadDependencies();
+
+  ipcMain.on(
+    'controller',
+    async (
+      _event: Electron.IpcMainEvent,
+      payload: { controller: string; method: string; body?: any }
+    ) => {
+      const controller: any = dyContainer.get(
+        dyContainer.getDependencyKey(payload.controller + 'Controller')
+      );
+      controller[payload.method](payload.body);
+    }
+  );
+
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
